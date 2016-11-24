@@ -8,7 +8,7 @@
  * */
 
 void Normal_Format  (FILE * bm ) {
-    // You'll read the fucking file and then put each insert into and array
+    // You'll read the file and then put each insert into and array
     int c
 
 }
