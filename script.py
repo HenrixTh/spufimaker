@@ -10,7 +10,7 @@ script, sqlServerTxt = argv
 
 # este dicionario inclui todos os statements necessarios para gerar um SPUFI
 sqlStatements = {
-    'INSERT' : ['INSERT INTO ', 'VALUES (', ');'],
+    'INSERT' : ['INSERT INTO ', ' VALUES ', ');'],
     'UPDATE' : ['UPDATE ', 'SET ', '= ', 'WHERE', ');'],
     'DELETE' : ['DELETE FROM ', 'WHERE', ');']
 }
@@ -38,22 +38,25 @@ table5081Fields = [
 ]
 
 # Criando o arquivo de saida (resultado)
-mySpufi = open('mySpufi.dat', 'w+')
+mySpufi = open('mySpufi.txt', 'w+')
 
 # Esta funcao recebe o novo arquivo como parametros e le o arquivo de entrada como um objeto
 # A cada linha do objeto eu gero uma list contendo varias strings.
 def sqlGen(mySpufi):
     with open(sqlServerTxt, encoding = 'utf-8') as queryResult:
+        firstStatement = sqlStatements['INSERT'][0]
+        firstStatement += sqlServerTxt
+        firstStatement += sqlStatements['INSERT'][1]
+        mySpufi.write(firstStatement + "\n")
         listOfLines = queryResult.readlines()
         for line in listOfLines:
+            mySpufi.write("( ")
             data = line.split()
-            statements = sqlStatements['INSERT']
-            for i in range(0, len(statements)):
-                statements.insert(1 + i ,data[i])
-            statements[0] += sqlServerTxt
-            for j in range(0, len(statements)):
-                mySpufi.write(statements[j])
-            mySpufi.write("\n")
+            for i in data:
+                mySpufi.write(i + ",")
+            mySpufi.write("),\n")
+    return
+
 
 sqlGen(mySpufi)
 mySpufi.close()
