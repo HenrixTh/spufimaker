@@ -17,6 +17,8 @@ mySpufi = open('mySpufi.txt', 'w+', encoding='utf-8')
 def lineStatement(string):
     if string == '^':
         string = ' '
+    if string.find('.') >= 0:
+        return string + ','
     newString = '\'' + string + '\','
     return newString
 
@@ -44,7 +46,7 @@ def sqlGen(mySpufi):
             for j in range(0, len(data)):
                 mySpufi.write(lineStatement(data[j]))
                 counter += len(data[j]) + 2
-                if counter > 55:
+                if counter > 45:
                     mySpufi.write('\n  ')
                     counter = 0
 
