@@ -1,2 +1,2 @@
 # spufimaker
-When you have a big load of text you need to insert using SQL on z/OS.
+When you have a big load of results from a SQLServer Query to be updated via SPUFI (z/OS).
