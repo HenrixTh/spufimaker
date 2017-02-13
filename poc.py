@@ -1,3 +1,4 @@
+import os, sys
 from sys import argv
 from os.path import exists
 
@@ -39,12 +40,6 @@ def sqlGen(mySpufi):
 
             # Closing )
             mySpufi.write(' \'' + data[len(data) - 1] + '\'),')
-        lastLine = listOfLines[len(listOfLines) - 1].split()
-
-        mySpufi.write('\n    (\n')
-        for j in range(1, len(lastLine) - 1):
-            mySpufi.write('    \'' + lastLine[j] + '\',\n')
-        mySpufi.write('    \'' + data[len(data) - 1] + '\'\n    )')
     mySpufi.write('\n' + sqlStatements['INSERT'][3])
 
 sqlGen(mySpufi)
