@@ -1,6 +1,5 @@
-import os, sys
+import os, sys, math
 from sys import argv
-from os.path import exists
 
 # Receives Table Name as parameter
 script, sqlServerTxt = argv
@@ -15,32 +14,53 @@ sqlStatements = {
 # Creating output file (SPUFI)
 mySpufi = open('mySpufi.txt', 'w+', encoding='utf-8')
 
+def lineStatement(string):
+    if string == '^':
+        string = ' '
+    newString = '\'' + string + '\','
+    return newString
+
+
 # This function receives an output file as a parameter and reads input file as and object
+# Then it will read each line from the input file, split it into an array of strings and
+# generate SQL statements inserting each string from this array as a value.
 def sqlGen(mySpufi):
     with open(sqlServerTxt + '.txt', encoding = 'utf-8') as queryResult:
-        # INSERT INTO sqlServerText VALUES (
+        # Writing initial SQL statements:
         for i in range (0, 3):
             mySpufi.write(sqlStatements['INSERT'][i])
 
         listOfLines = queryResult.readlines()
 
         for i in range(2, len(listOfLines) - 3):
-            #Handling with my list of strings:
+            counter = 0
+            # The reason you need this counter is to keep track of how many
+            # lines are being written in a single line due to the fact that
+            # z/OS assumes your line's width to be <= 72 characters.
+
+            mySpufi.write('\n  (')
+
             data = listOfLines[i].split()
-            #Writing (
-            mySpufi.write('\n    (')
+            for j in range(0, len(data)):
+                mySpufi.write(lineStatement(data[j]))
+                counter += len(data[j]) + 2
+                if counter > 55:
+                    mySpufi.write('\n  ')
+                    counter = 0
 
-            for j in range(0,int((len(data) - 1)/2)):
-                mySpufi.write('\'' + data[j] + '\',')
+            mySpufi.write(' CURRENT_TIMESTAMP),')
+        mySpufi.close()
+    return
 
-            mySpufi.write('\n    ')
-
-            for k in range(int((len(data) - 1)/2), len(data) - 1):
-                mySpufi.write('\'' + data[k] + '\',')
-
-            # Closing )
-            mySpufi.write(' \'' + data[len(data) - 1] + '\'),')
-    mySpufi.write('\n' + sqlStatements['INSERT'][3])
+def removeLastComma():
+    with open('mySpufi.txt', 'rb+') as mySpufi:
+        mySpufi.seek(-1, os.SEEK_END)
+        mySpufi.truncate()
+        mySpufi.close()
+    with open('mySpufi.txt', 'a') as mySpufi:
+        mySpufi.write('\n' + sqlStatements['INSERT'][3])
+        mySpufi.close()
+    return
 
 sqlGen(mySpufi)
-mySpufi.close()
+removeLastComma()
