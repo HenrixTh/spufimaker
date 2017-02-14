@@ -26,33 +26,51 @@ def lineStatement(string):
 # This function receives an output file as a parameter and reads input file as and object
 # Then it will read each line from the input file, split it into an array of strings and
 # generate SQL statements inserting each string from this array as a value.
+
+def insert(*args):
+    for i in range (0, 3):
+        args[0].write(sqlStatements['INSERT'][i])
+
+        counter = 0
+        # The reason you need this counter is to keep track of how many
+        # lines are being written in a single line due to the fact that
+        # z/OS assumes your line's width to be <= 72 characters.
+
+        args[0].write('\n  (')
+        for j in range(0, len(args[2])):
+            args[0].write(lineStatement(args[2][j]))
+            counter += len(data[j]) + 2
+            if counter > 45:
+                args[0].write('\n  ')
+                counter = 0
+
+        mySpufi.write(' CURRENT_TIMESTAMP),')
+    return
+
+
+def update(*args):
+    key = '_KEY'
+    keys = for any(key in word for word in args[1])
+    args[0].write(sqlStatements['UPDATE'][0] + sqlServerTxt + '\n' + sqlStatements['UPDATE'][1] + '\n')
+    for i in range(0, len(args[1] - 1):
+        args[0].write(args[1][i] + '=' + lineStatement(args[2][i]) + ',\n')
+
+
 def sqlGen(mySpufi):
     with open(sqlServerTxt + '.txt', encoding = 'utf-8') as queryResult:
-        # Writing initial SQL statements:
-        for i in range (0, 3):
-            mySpufi.write(sqlStatements['INSERT'][i])
 
         listOfLines = queryResult.readlines()
 
-        for i in range(2, len(listOfLines) - 3):
-            counter = 0
-            # The reason you need this counter is to keep track of how many
-            # lines are being written in a single line due to the fact that
-            # z/OS assumes your line's width to be <= 72 characters.
-
-            mySpufi.write('\n  (')
-
-            data = listOfLines[i].split()
-            for j in range(0, len(data)):
-                mySpufi.write(lineStatement(data[j]))
-                counter += len(data[j]) + 2
-                if counter > 45:
-                    mySpufi.write('\n  ')
-                    counter = 0
-
-            mySpufi.write(' CURRENT_TIMESTAMP),')
-        mySpufi.close()
-    return
+        columns = listOfLines[0].split()
+        options = {
+            'A' : 'insert',
+            'C' : 'update',
+            'D' : 'delete'
+        }
+        for i in range(2, len(listOfLines))
+            data = listOfLines[i].split
+            options[data[len(data) - 1]](mySpufi, columns, data)
+        return
 
 def removeLastComma():
     with open('mySpufi.txt', 'rb+') as mySpufi:
