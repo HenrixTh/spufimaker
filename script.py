@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os, sys, math
 from sys import argv
 
@@ -11,15 +12,23 @@ sqlStatements = {
     'DELETE' : ['DELETE FROM ', 'WHERE', ');']
 }
 
-# Creating output file (SPUFI)
-mySpufi = open('mySpufi.txt', 'w+', encoding='utf-8')
+tableKeys = {
+    'Table1' : ['BLAUS0', 'BLAUS1', 'BLAUS2', 'BLAUS3', 'BLAUS4']
+}
 
-def lineStatement(string):
-    if string == '^':
-        string = ' '
-    if string.find('.') >= 0:
-        return string + ','
-    newString = '\'' + string + '\','
+
+
+# Creating output file (SPUFI)
+mySpufi = open('mySpufi.txt', 'w+', encoding='utf-8-sig')
+
+def lineStatement(*args):
+    newString = args[0]
+    if newString == '^':
+        newString = ' '
+    if newString.find('.') == -1:
+        newString = '\'' + newString + '\''
+    if 'L' not in args:
+        newString += ','
     return newString
 
 
@@ -49,38 +58,42 @@ def insert(*args):
 
 
 def update(*args):
-    key = '_KEY'
-    keys = for any(key in word for word in args[1])
-    args[0].write(sqlStatements['UPDATE'][0] + sqlServerTxt + '\n' + sqlStatements['UPDATE'][1] + '\n')
-    for i in range(0, len(args[1] - 1):
-        args[0].write(args[1][i] + '=' + lineStatement(args[2][i]) + ',\n')
+#    key = '_KEY'
+#    keys = for any(key in word for word in args[1])
+    keys = tableKeys[sqlServerTxt]
+    args[0].write(sqlStatements['UPDATE'][0] + sqlServerTxt + '\n' + sqlStatements['UPDATE'][1] + '(\n')
+    for i in range(0, len(args[1]) - 2):
+        args[0].write('  ' + args[1][i] + ' = ' + lineStatement(args[2][i]) + '\n')
+    args[0].write('  ' + args[1][i + 1] + ' = ' + lineStatement(args[2][i + 1], 'L') + '\n')
 
+    args[0].write('  )\n  WHERE (\n  ' +  keys[0] + ' = ' + lineStatement(args[2][0]) + '\n')
+    for i in range(1, len(keys) - 1):
+        args[0].write('  AND ' + keys[i] + ' = ' + lineStatement(args[2][i]) + '\n')
+    args[0].write('  AND ' + keys[i + 1] + ' = ' + lineStatement(args[2][i + 1], 'L') + '\n')
+    args[0].write(');\n')
+
+def delete():
+    pass
 
 def sqlGen(mySpufi):
-    with open(sqlServerTxt + '.txt', encoding = 'utf-8') as queryResult:
-
+    with open(sqlServerTxt + '.txt', encoding = 'utf-8-sig') as queryResult:
+    
         listOfLines = queryResult.readlines()
-
-        columns = listOfLines[0].split()
+        
+        fields = listOfLines[0].split()
+        
         options = {
-            'A' : 'insert',
-            'C' : 'update',
-            'D' : 'delete'
+            'A' : insert,
+            'C' : update,
+            'D' : delete
         }
-        for i in range(2, len(listOfLines))
-            data = listOfLines[i].split
-            options[data[len(data) - 1]](mySpufi, columns, data)
+        for i in range(2, len(listOfLines) - 3):
+            data = listOfLines[i].split()
+            # Reads ROW_ACTION from line as a key and returns value
+            # as a function:
+            #print(len(data) - 1); print(data[len(data) - 1])
+            rowAction = data[len(data) - 1]
+            options[rowAction](mySpufi, fields, data)
         return
 
-def removeLastComma():
-    with open('mySpufi.txt', 'rb+') as mySpufi:
-        mySpufi.seek(-1, os.SEEK_END)
-        mySpufi.truncate()
-        mySpufi.close()
-    with open('mySpufi.txt', 'a') as mySpufi:
-        mySpufi.write('\n' + sqlStatements['INSERT'][3])
-        mySpufi.close()
-    return
-
 sqlGen(mySpufi)
-removeLastComma()
